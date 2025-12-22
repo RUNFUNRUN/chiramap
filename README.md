@@ -1,6 +1,6 @@
 # Chiramap (チラマップ)
 
-「チラッ」と見るだけの、和製一方向・短時間位置情報共有サービス。
+「チラッ」と見るだけの、一方向・短時間位置情報共有サービス。
 A short-term, one-way location sharing application.
 
 ## 概要
@@ -11,7 +11,7 @@ Chiramapは、一時的に自分の位置情報を相手に共有するための
 ## 技術スタック
 
 *   **Monorepo**: Turborepo
-*   **Web**: Next.js (App Router) on Cloudflare Pages
+*   **Web**: Next.js (App Router) on Cloudflare Workers (via OpenNext)
 *   **API**: Hono on Cloudflare Workers
 *   **Database**: Supabase (PostgreSQL)
 
