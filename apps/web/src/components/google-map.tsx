@@ -2,6 +2,7 @@
 
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
 import { useEffect, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 
 type GoogleMapProps = {
   apiKey: string;
@@ -10,19 +11,17 @@ type GoogleMapProps = {
   markerPosition?: { lat: number; lng: number };
 };
 
+const BlueDot = () => (
+  <div className='relative flex items-center justify-center'>
+    <div className='absolute w-8 h-8 bg-blue-500/20 rounded-full animate-pulse' />
+    <div className='relative w-4 h-4 bg-blue-500 border-[3px] border-white rounded-full shadow-[0_0_4px_rgba(0,0,0,0.15)]' />
+  </div>
+);
+
 const createBlueDot = () => {
   const container = document.createElement('div');
-  container.className = 'relative flex items-center justify-center';
-
-  const halo = document.createElement('div');
-  halo.className = 'absolute w-8 h-8 bg-blue-500/20 rounded-full animate-pulse';
-
-  const dot = document.createElement('div');
-  dot.className =
-    'relative w-4 h-4 bg-blue-500 border-[3px] border-white rounded-full shadow-[0_0_4px_rgba(0,0,0,0.15)]';
-
-  container.appendChild(halo);
-  container.appendChild(dot);
+  const root = createRoot(container);
+  root.render(<BlueDot />);
   return container;
 };
 
