@@ -1,9 +1,8 @@
 import { zValidator } from '@hono/zod-validator';
 import type { Session, User } from 'better-auth';
 import { and, desc, eq, gt } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/postgres-js';
+import { drizzle } from 'drizzle-orm/d1';
 import { Hono } from 'hono';
-import postgres from 'postgres';
 import { z } from 'zod';
 import { shares } from '../db/schema';
 import { authMiddleware } from '../middleware';
@@ -31,15 +30,18 @@ const app = new Hono<{
     async (c) => {
       const { expiresIn } = c.req.valid('json');
       const user = c.get('user');
-      const db = drizzle(postgres(c.env.DATABASE_URL));
+      const db = drizzle(c.env.DB);
       const expiresAt = new Date(Date.now() + expiresIn * 60 * 1000);
 
       const [newShare] = await db
         .insert(shares)
         .values({
+          id: crypto.randomUUID(),
           ownerId: user.id,
           expiresAt,
           active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
         .returning();
 
@@ -48,7 +50,7 @@ const app = new Hono<{
   )
   .get('/active', authMiddleware, async (c) => {
     const user = c.get('user');
-    const db = drizzle(postgres(c.env.DATABASE_URL));
+    const db = drizzle(c.env.DB);
 
     // Find the most recent active share for the user
     const [activeShare] = await db
@@ -78,7 +80,7 @@ const app = new Hono<{
       const id = c.req.param('id');
       const { active } = c.req.valid('json');
       const user = c.get('user');
-      const db = drizzle(postgres(c.env.DATABASE_URL));
+      const db = drizzle(c.env.DB);
 
       const [updatedShare] = await db
         .update(shares)
@@ -96,7 +98,7 @@ const app = new Hono<{
   .get('/:id', async (c) => {
     // Public access for viewing share
     const id = c.req.param('id');
-    const db = drizzle(postgres(c.env.DATABASE_URL));
+    const db = drizzle(c.env.DB);
     try {
       const [share] = await db.select().from(shares).where(eq(shares.id, id));
 

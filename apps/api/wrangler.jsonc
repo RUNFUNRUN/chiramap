@@ -7,5 +7,13 @@
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chiramap-db",
+      "database_id": "d77a8341-9a01-4d74-a7cb-455738055b1e",
+      "migrations_dir": "drizzle"
+    }
+  ]
 }

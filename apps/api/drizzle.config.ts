@@ -4,10 +4,8 @@ import { defineConfig } from 'drizzle-kit';
 config({ path: '.dev.vars' });
 
 export default defineConfig({
-  dialect: 'postgresql',
+  dialect: 'sqlite',
   schema: './src/db/schema.ts',
   out: './drizzle',
-  dbCredentials: {
-    url: process.env.DATABASE_URL ?? '',
-  },
+  // You can add driver: 'd1-http' here if using remote D1 for studio
 });

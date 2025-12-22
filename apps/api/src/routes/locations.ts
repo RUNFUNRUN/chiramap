@@ -1,9 +1,8 @@
 import { zValidator } from '@hono/zod-validator';
 import type { Session, User } from 'better-auth';
 import { desc, eq } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/postgres-js';
+import { drizzle } from 'drizzle-orm/d1';
 import { Hono } from 'hono';
-import postgres from 'postgres';
 import { z } from 'zod';
 import { locations, shares } from '../db/schema';
 import { authMiddleware } from '../middleware';
@@ -34,7 +33,7 @@ const app = new Hono<{
         c.req.valid('json');
       const user = c.get('user');
 
-      const db = drizzle(postgres(c.env.DATABASE_URL));
+      const db = drizzle(c.env.DB);
 
       // Verify ownership
       const [share] = await db
@@ -57,6 +56,7 @@ const app = new Hono<{
       const [newLocation] = await db
         .insert(locations)
         .values({
+          id: crypto.randomUUID(),
           shareId,
           lat,
           lng,
@@ -64,6 +64,8 @@ const app = new Hono<{
           speed,
           accuracy,
           timestamp: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
         .returning();
 
@@ -72,7 +74,7 @@ const app = new Hono<{
   )
   .get('/:shareId', async (c) => {
     const shareId = c.req.param('shareId');
-    const db = drizzle(postgres(c.env.DATABASE_URL));
+    const db = drizzle(c.env.DB);
 
     const [location] = await db
       .select()

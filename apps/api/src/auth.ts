@@ -1,13 +1,12 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/d1';
 import * as schema from './db/schema';
 
 export const getAuth = (env: CloudflareBindings) => {
   return betterAuth({
-    database: drizzleAdapter(drizzle(postgres(env.DATABASE_URL)), {
-      provider: 'pg',
+    database: drizzleAdapter(drizzle(env.DB), {
+      provider: 'sqlite',
       schema: {
         ...schema,
       },
