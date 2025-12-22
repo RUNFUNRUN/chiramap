@@ -10,6 +10,22 @@ type GoogleMapProps = {
   markerPosition?: { lat: number; lng: number };
 };
 
+const createBlueDot = () => {
+  const container = document.createElement('div');
+  container.className = 'relative flex items-center justify-center';
+
+  const halo = document.createElement('div');
+  halo.className = 'absolute w-8 h-8 bg-blue-500/20 rounded-full animate-pulse';
+
+  const dot = document.createElement('div');
+  dot.className =
+    'relative w-4 h-4 bg-blue-500 border-[3px] border-white rounded-full shadow-[0_0_4px_rgba(0,0,0,0.15)]';
+
+  container.appendChild(halo);
+  container.appendChild(dot);
+  return container;
+};
+
 const GoogleMap = ({
   apiKey,
   center = { lat: 35.6812, lng: 139.7671 }, // Tokyo Station
@@ -53,6 +69,7 @@ const GoogleMap = ({
           const newMarker = new AdvancedMarkerElement({
             map: mapInstance,
             position: markerPosition,
+            content: createBlueDot(),
           });
           setMarker(newMarker);
         }
@@ -72,6 +89,7 @@ const GoogleMap = ({
         const newMarker = new AdvancedMarkerElement({
           map,
           position: markerPosition,
+          content: createBlueDot(),
         });
         setMarker(newMarker);
       });
