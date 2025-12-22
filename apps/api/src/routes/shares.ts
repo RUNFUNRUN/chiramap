@@ -1,15 +1,23 @@
 import { zValidator } from '@hono/zod-validator';
-import { eq } from 'drizzle-orm';
+import type { Session, User } from 'better-auth';
+import { and, desc, eq, gt } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { Hono } from 'hono';
 import postgres from 'postgres';
 import { z } from 'zod';
-import { getAuth } from '../auth';
 import { shares } from '../db/schema';
+import { authMiddleware } from '../middleware';
 
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+const app = new Hono<{
+  Bindings: CloudflareBindings;
+  Variables: {
+    session: Session;
+    user: User;
+  };
+}>()
   .post(
     '/',
+    authMiddleware,
     zValidator(
       'json',
       z.object({
@@ -22,18 +30,14 @@ const app = new Hono<{ Bindings: CloudflareBindings }>()
     ),
     async (c) => {
       const { expiresIn } = c.req.valid('json');
-      const auth = getAuth(c.env);
-      const session = await auth.api.getSession({
-        headers: c.req.raw.headers,
-      });
-      const ownerId = session?.user.id;
+      const user = c.get('user');
       const db = drizzle(postgres(c.env.DATABASE_URL));
       const expiresAt = new Date(Date.now() + expiresIn * 60 * 1000);
 
       const [newShare] = await db
         .insert(shares)
         .values({
-          ownerId,
+          ownerId: user.id,
           expiresAt,
           active: true,
         })
@@ -42,10 +46,57 @@ const app = new Hono<{ Bindings: CloudflareBindings }>()
       return c.json(newShare);
     },
   )
-  .get('/:id', async (c) => {
-    const id = c.req.param('id');
+  .get('/active', authMiddleware, async (c) => {
+    const user = c.get('user');
     const db = drizzle(postgres(c.env.DATABASE_URL));
 
+    // Find the most recent active share for the user
+    const [activeShare] = await db
+      .select()
+      .from(shares)
+      .where(
+        and(
+          eq(shares.ownerId, user.id),
+          eq(shares.active, true),
+          gt(shares.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(shares.createdAt))
+      .limit(1);
+
+    if (!activeShare) {
+      return c.json(null);
+    }
+
+    return c.json(activeShare);
+  })
+  .put(
+    '/:id/active',
+    authMiddleware,
+    zValidator('json', z.object({ active: z.boolean() })),
+    async (c) => {
+      const id = c.req.param('id');
+      const { active } = c.req.valid('json');
+      const user = c.get('user');
+      const db = drizzle(postgres(c.env.DATABASE_URL));
+
+      const [updatedShare] = await db
+        .update(shares)
+        .set({ active })
+        .where(and(eq(shares.id, id), eq(shares.ownerId, user.id)))
+        .returning();
+
+      if (!updatedShare) {
+        return c.json({ error: 'Share not found or unauthorized' }, 404);
+      }
+
+      return c.json(updatedShare);
+    },
+  )
+  .get('/:id', async (c) => {
+    // Public access for viewing share
+    const id = c.req.param('id');
+    const db = drizzle(postgres(c.env.DATABASE_URL));
     try {
       const [share] = await db.select().from(shares).where(eq(shares.id, id));
 

@@ -23,5 +23,6 @@ export const getAuth = (env: CloudflareBindings) => {
         clientSecret: env.GOOGLE_CLIENT_SECRET,
       },
     },
+    trustedOrigins: env.CORS_ORIGIN.split(','),
   });
 };

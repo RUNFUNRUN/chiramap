@@ -20,17 +20,20 @@ const GoogleMap = ({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] =
     useState<google.maps.marker.AdvancedMarkerElement | null>(null);
+  const initialized = useRef(false);
 
+  // Initialize Map only once
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
     const initMap = async () => {
-      // Configure the loader globally with the API key and other options
       setOptions({
         key: apiKey,
         v: 'weekly',
-        libraries: ['marker'], // Required for AdvancedMarkerElement
+        libraries: ['marker'],
       });
 
-      // Now, import libraries directly using the functional API
       const { Map: GoogleMapLibrary } = await importLibrary('maps');
       const { AdvancedMarkerElement } = await importLibrary('marker');
 
@@ -38,13 +41,14 @@ const GoogleMap = ({
         const mapInstance = new GoogleMapLibrary(mapRef.current, {
           center,
           zoom,
-          mapId: 'DEMO_MAP_ID', // Required for Advanced Markers, replace with real ID for production
-          disableDefaultUI: true, // Keep it simple
-          clickableIcons: false, // Reduce noise
+          mapId: 'DEMO_MAP_ID',
+          disableDefaultUI: true,
+          clickableIcons: false,
         });
 
         setMap(mapInstance);
 
+        // Initial marker
         if (markerPosition) {
           const newMarker = new AdvancedMarkerElement({
             map: mapInstance,
@@ -56,17 +60,32 @@ const GoogleMap = ({
     };
 
     initMap();
-  }, [apiKey, center, markerPosition, zoom]); // Run once on mount (technically when apiKey changes, but it's stable)
+  }, [apiKey, center, markerPosition, zoom]);
 
-  // Update marker position when prop changes
+  // Update marker position
   useEffect(() => {
     if (marker && markerPosition) {
       marker.position = markerPosition;
-    }
-    if (map && markerPosition) {
-      map.panTo(markerPosition);
+    } else if (map && markerPosition && !marker) {
+      // Create marker if it wasn't created during init (e.g. started without position)
+      importLibrary('marker').then(({ AdvancedMarkerElement }) => {
+        const newMarker = new AdvancedMarkerElement({
+          map,
+          position: markerPosition,
+        });
+        setMarker(newMarker);
+      });
     }
   }, [marker, markerPosition, map]);
+
+  // Update map center/pan
+  useEffect(() => {
+    if (map && center) {
+      // Only pan if the distance is significant to avoid jitter or conflict with user interaction?
+      // For this app (tracking), we probably want to follow.
+      map.panTo(center);
+    }
+  }, [map, center]);
 
   return <div ref={mapRef} className='h-full w-full min-h-[400px]' />;
 };

@@ -26,6 +26,7 @@
   },
   "linter": {
     "enabled": true,
+    "includes": ["**", "!src/components/ui"],
     "rules": {
       "recommended": true
     }

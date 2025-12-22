@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { M_PLUS_Rounded_1c } from 'next/font/google';
+import Providers from '@/components/providers';
 import './globals.css';
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
@@ -28,7 +29,7 @@ const RootLayout = ({
   return (
     <html lang='ja'>
       <body className={`${mPlusRounded1c.variable} font-sans antialiased`}>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
