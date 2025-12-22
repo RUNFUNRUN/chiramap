@@ -8,23 +8,22 @@ ChiramapのバックエンドAPIです。Honoで実装され、Cloudflare Worker
 *   **Runtime**: Cloudflare Workers
 *   **Auth**: Better Auth (with Google OIDC)
 *   **Validation**: Zod
-*   **Database**: Supabase (PostgreSQL) + Drizzle ORM
+*   **Database**: Cloudflare D1 (SQLite) + Drizzle ORM
 
 ## 環境設定 (.dev.vars)
 
 開発には `.dev.vars` ファイルが必要です。以下の環境変数を設定してください。
 
 ```env
-DATABASE_URL="postgres://postgres.xxxx:pass@aws-0-region.pooler.supabase.com:6543/postgres"
-SUPABASE_URL="https://xxxx.supabase.co"
-SUPABASE_PUBLISHABLE_KEY="xxxx"
 BETTER_AUTH_SECRET="random_secret_string"
 BETTER_AUTH_URL="http://localhost:8787"
 GOOGLE_CLIENT_ID="xxxx.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="xxxx"
+CORS_ORIGIN="http://localhost:3000"
 ```
 
-*   `DATABASE_URL`: Cloudflare Workersから接続するため、SupabaseのTransaction Pooler (Port 6543) を指定してください。
+*   **Database**: D1データベースは `wrangler.jsonc` のバインディング経由でアクセスされるため、環境変数でのURL指定は不要です。
+*   `BETTER_AUTH_SECRET`: ランダムな文字列を生成して設定してください。
 
 ## API仕様
 

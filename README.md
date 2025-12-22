@@ -13,7 +13,7 @@ Chiramapは、一時的に自分の位置情報を相手に共有するための
 *   **Monorepo**: Turborepo
 *   **Web**: Next.js (App Router) on Cloudflare Workers (via OpenNext)
 *   **API**: Hono on Cloudflare Workers
-*   **Database**: Supabase (PostgreSQL)
+*   **Database**: Cloudflare D1 (SQLite)
 
 詳細は [apps/api](./apps/api) および [apps/web](./apps/web) のREADMEを参照してください。
 

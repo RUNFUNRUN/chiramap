@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chiramap Web
 
-## Getting Started
+Chiramapのフロントエンドアプリケーションです。Next.js (App Router) で実装され、OpenNext を介して Cloudflare Workers 上で動作します。
 
-First, run the development server:
+## 技術スタック
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+*   **Framework**: Next.js 15 (App Router)
+*   **Language**: TypeScript
+*   **Styling**: Tailwind CSS
+*   **Components**: shadcn/ui
+*   **Map Integration**: Google Maps JavaScript API via `@googlemaps/js-api-loader`
+*   **Runtime**: Cloudflare Workers (via OpenNext)
+*   **Deployment**: Cloudflare Pages / Workers
+
+## 環境設定 (.env.local)
+
+開発には `.env.local` ファイルが必要です。
+
+```env
+NEXT_PUBLIC_API_URL="http://localhost:8787"
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="AIzaSy..."
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+*   `NEXT_PUBLIC_API_URL`: Backend APIのURL。ローカル開発時は `http://localhost:8787`。
+*   `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: Google Maps Platform の API Key。`Maps JavaScript API` を有効化してください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 開発コマンド
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 起動 (Dev Server)
 
-## Learn More
+```bash
+bun dev
+```
+`http://localhost:3000` で起動します。
 
-To learn more about Next.js, take a look at the following resources:
+### ビルド (Build)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+OpenNext / Cloudflare Workers 用のビルドを行います。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+bun run build
+```
 
-## Deploy on Vercel
+## ディレクトリ構造
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*   `src/app`: App Router ページコンポーネント
+*   `src/components`: UIコンポーネント (shadcn/ui 含む)
+*   `src/lib`: APIクライアント、ユーティリティなど
