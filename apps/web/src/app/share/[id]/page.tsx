@@ -6,18 +6,6 @@ import GoogleMap from '@/components/google-map';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { client } from '@/lib/api-client';
 
-type Share = {
-  id: string;
-  active: boolean;
-  expiresAt: string;
-};
-
-type LocationData = {
-  lat: number;
-  lng: number;
-  timestamp: string;
-};
-
 const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params);
 
@@ -35,7 +23,9 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
       if (res.status === 404) throw new Error('シェアが見つかりません');
       if (res.status === 410) throw new Error('シェアの有効期限が切れています');
       if (!res.ok) throw new Error('エラーが発生しました');
-      return res.json() as Promise<Share>;
+      const data = await res.json();
+      if (!('id' in data)) throw new Error('Invalid response');
+      return data;
     },
     retry: false,
   });
@@ -47,12 +37,10 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
       const res = await client.api.locations[':shareId'].$get({
         param: { shareId: id },
       });
-      if (!res.ok) return null;
+      if (!res.ok) return;
       const data = await res.json();
-      if (data && 'lat' in data && 'lng' in data) {
-        return data as LocationData;
-      }
-      return null;
+      if (!('lat' in data)) return;
+      return data;
     },
     enabled: !!share,
     refetchInterval: 5000,
