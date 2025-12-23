@@ -37,9 +37,9 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
       const res = await client.api.locations[':shareId'].$get({
         param: { shareId: id },
       });
-      if (!res.ok) return;
+      if (!res.ok) return null;
       const data = await res.json();
-      if (!('lat' in data)) return;
+      if (!('lat' in data)) return null;
       return data;
     },
     enabled: !!share,

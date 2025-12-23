@@ -31,13 +31,13 @@ const Home = () => {
     queryKey: ['activeShare'],
     queryFn: async () => {
       const res = await client.api.shares.active.$get();
-      if (!res.ok) return;
+      if (!res.ok) return null;
       return res.json();
     },
     enabled: !!session?.user,
     refetchInterval: (query) => {
       // Poll every 5 seconds if we have an active share to check for expiration
-      // Stop polling if no active share (or if query.state.data is undefined)
+      // Stop polling if no active share (or if query.state.data is null)
       return query.state.data ? 5000 : false;
     },
   });
@@ -89,7 +89,7 @@ const Home = () => {
       if (!res.ok) throw new Error('Failed to stop share');
     },
     onSuccess: () => {
-      queryClient.setQueryData(['activeShare'], undefined);
+      queryClient.setQueryData(['activeShare'], null);
     },
   });
 
