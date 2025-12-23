@@ -8,24 +8,24 @@ const app = new Hono<{
   Bindings: CloudflareBindings;
 }>();
 
-app.use('/api/*', async (c, next) => {
-  const corsMiddlewareHandler = cors({
-    origin: c.env.CORS_ORIGIN.split(','),
-    credentials: true,
-  });
-  return corsMiddlewareHandler(c, next);
-});
-
 const routes = app
-  .get('/api', (c) => {
+  .basePath('/api')
+  .use('*', async (c, next) => {
+    const corsMiddlewareHandler = cors({
+      origin: c.env.CORS_ORIGIN.split(','),
+      credentials: true,
+    });
+    return corsMiddlewareHandler(c, next);
+  })
+  .get('/', (c) => {
     return c.text('Chiramap API is running!');
   })
-  .all('/api/auth/*', (c) => {
+  .all('/auth/*', (c) => {
     const auth = getAuth(c.env);
     return auth.handler(c.req.raw);
   })
-  .route('/api/shares', sharesRouter)
-  .route('/api/locations', locationRouter);
+  .route('/shares', sharesRouter)
+  .route('/locations', locationRouter);
 
 export type AppType = typeof routes;
 export default app;

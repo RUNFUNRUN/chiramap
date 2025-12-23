@@ -12,7 +12,7 @@ const makeQueryClient = () => {
   });
 };
 
-let browserQueryClient: QueryClient | undefined = undefined;
+let browserQueryClient: QueryClient | undefined;
 
 const getQueryClient = () => {
   if (typeof window === 'undefined') {
