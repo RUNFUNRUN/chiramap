@@ -20,7 +20,7 @@ const app = new Hono<{
     zValidator(
       'json',
       z.object({
-        shareId: z.string().uuid(),
+        shareId: z.uuid(),
         lat: z.number(),
         lng: z.number(),
         heading: z.number().optional(),
@@ -72,22 +72,31 @@ const app = new Hono<{
       return c.json(newLocation);
     },
   )
-  .get('/:shareId', async (c) => {
-    const shareId = c.req.param('shareId');
-    const db = drizzle(c.env.DB);
+  .get(
+    '/:shareId',
+    zValidator(
+      'param',
+      z.object({
+        shareId: z.uuid(),
+      }),
+    ),
+    async (c) => {
+      const { shareId } = c.req.valid('param');
+      const db = drizzle(c.env.DB);
 
-    const [location] = await db
-      .select()
-      .from(locations)
-      .where(eq(locations.shareId, shareId))
-      .orderBy(desc(locations.timestamp))
-      .limit(1);
+      const [location] = await db
+        .select()
+        .from(locations)
+        .where(eq(locations.shareId, shareId))
+        .orderBy(desc(locations.timestamp))
+        .limit(1);
 
-    if (!location) {
-      return c.json({ error: 'Location not found' }, 404);
-    }
+      if (!location) {
+        return c.json({ error: 'Location not found' }, 404);
+      }
 
-    return c.json(location);
-  });
+      return c.json(location);
+    },
+  );
 
 export default app;
