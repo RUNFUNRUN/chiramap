@@ -17,7 +17,7 @@ import { client } from '@/lib/api-client';
 import { authClient } from '@/lib/auth-client';
 
 const Home = () => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
   const { data: session, isPending } = authClient.useSession();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
