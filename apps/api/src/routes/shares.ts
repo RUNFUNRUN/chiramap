@@ -67,7 +67,7 @@ const app = new Hono<{
       .limit(1);
 
     if (!activeShare) {
-      return c.json(null);
+      return c.json({ error: 'No active share' }, 404);
     }
 
     return c.json(activeShare);
