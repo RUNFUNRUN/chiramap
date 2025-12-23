@@ -232,7 +232,9 @@ const Home = () => {
                     onClick={handleLogin}
                     disabled={loading || isPending}
                   >
-                    {loading ? '読み込み中...' : 'Googleでログインして始める'}
+                    {loading || isPending
+                      ? '読み込み中...'
+                      : 'Googleでログインして始める'}
                   </Button>
                 )}
               </CardContent>
