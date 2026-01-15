@@ -73,16 +73,16 @@ const ActiveShareCard = ({
   );
 
   return (
-    <Card className='w-full max-w-md border-0 shadow-xl backdrop-blur-sm bg-background/90'>
-      <CardHeader className='text-center'>
-        <CardTitle className='text-2xl font-bold flex items-center justify-center gap-2'>
-          <span className='relative flex h-3 w-3'>
+    <Card className='w-full max-w-md backdrop-blur-sm bg-background/90'>
+      <CardHeader className='text-center pb-2'>
+        <CardTitle className='text-xl font-bold flex items-center justify-center gap-2'>
+          <span className='relative flex h-2.5 w-2.5'>
             <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>
-            <span className='relative inline-flex rounded-full h-3 w-3 bg-green-500'></span>
+            <span className='relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500'></span>
           </span>
           位置情報を共有中
         </CardTitle>
-        <CardDescription>
+        <CardDescription className='text-sm'>
           あと約{remainingMinutes}分で自動的に終了します
         </CardDescription>
       </CardHeader>
@@ -105,7 +105,12 @@ const ActiveShareCard = ({
               )}
             </div>
           </div>
-          <Button type='submit' size='icon' onClick={handleCopy}>
+          <Button
+            type='submit'
+            size='icon'
+            variant='outline'
+            onClick={handleCopy}
+          >
             {copied ? (
               <Check className='h-4 w-4 text-green-500' />
             ) : (
@@ -115,10 +120,10 @@ const ActiveShareCard = ({
           </Button>
         </div>
       </CardContent>
-      <CardFooter className='flex flex-col gap-0'>
+      <CardFooter className='flex flex-col gap-3 pt-2'>
         <Button
           variant='destructive'
-          className='w-full font-bold'
+          className='w-full font-semibold'
           onClick={handleStop}
           disabled={loading}
         >
@@ -126,15 +131,13 @@ const ActiveShareCard = ({
           {loading ? '停止中...' : '共有を停止する'}
         </Button>
         {onLogout && (
-          <div className='w-full pt-4 mt-2'>
-            <Button
-              variant='outline'
-              className='w-full text-muted-foreground hover:text-foreground'
-              onClick={onLogout}
-            >
-              ログアウト
-            </Button>
-          </div>
+          <Button
+            variant='ghost'
+            className='w-full text-muted-foreground hover:text-foreground'
+            onClick={onLogout}
+          >
+            ログアウト
+          </Button>
         )}
       </CardFooter>
     </Card>

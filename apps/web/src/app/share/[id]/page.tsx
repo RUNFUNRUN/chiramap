@@ -1,13 +1,19 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { use } from 'react';
-import GoogleMap from '@/components/google-map';
+import { use, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  MapMarker,
+  type MapRef,
+  Map as MapView,
+  MarkerContent,
+} from '@/components/ui/map';
 import { client } from '@/lib/api-client';
 
 const Page = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params);
+  const mapRef = useRef<MapRef>(null);
 
   // Fetch share details
   const {
@@ -46,6 +52,17 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
     refetchInterval: 5000,
   });
 
+  // Fly to location when it updates
+  useEffect(() => {
+    if (location && mapRef.current) {
+      mapRef.current.flyTo({
+        center: [location.lng, location.lat],
+        zoom: 15,
+        duration: 1000,
+      });
+    }
+  }, [location]);
+
   if (shareLoading) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
@@ -71,37 +88,35 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <div className='relative h-screen w-full'>
-      <div className='absolute top-4 inset-x-0 z-10 flex justify-center pointer-events-none'>
-        <Card className='bg-white/90 backdrop-blur-sm shadow-md pointer-events-auto'>
-          <div className='flex flex-col items-center gap-0 px-4 py-1.5 min-w-[200px]'>
+      <div className='absolute top-4 left-4 right-4 z-10 flex justify-center pointer-events-none'>
+        <Card className='bg-background/90 backdrop-blur-sm pointer-events-auto'>
+          <div className='flex flex-col items-center gap-0.5 px-4 min-w-[180px]'>
             <div className='flex items-center gap-2'>
-              <span className='relative flex h-2.5 w-2.5'>
+              <span className='relative flex h-2 w-2'>
                 <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>
-                <span className='relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500'></span>
+                <span className='relative inline-flex rounded-full h-2 w-2 bg-green-500'></span>
               </span>
-              <p className='text-sm font-bold'>位置情報を共有中</p>
+              <p className='text-sm font-semibold'>位置情報を共有中</p>
             </div>
-            <div className='flex items-center gap-2'>
-              <span className='text-xs font-bold text-muted-foreground whitespace-nowrap'>
-                最終更新
-              </span>
-              <span className='text-xs font-bold tabular-nums text-foreground'>
+            <p className='text-xs text-muted-foreground tabular-nums'>
+              最終更新:{' '}
+              <span className='text-foreground font-medium'>
                 {location
                   ? new Date(location.timestamp).toLocaleTimeString()
                   : '取得中...'}
               </span>
-            </div>
+            </p>
           </div>
         </Card>
       </div>
-      <GoogleMap
-        apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''}
-        center={location ? { lat: location.lat, lng: location.lng } : undefined}
-        zoom={15}
-        markerPosition={
-          location ? { lat: location.lat, lng: location.lng } : undefined
-        }
-      />
+
+      <MapView ref={mapRef} center={[139.7671, 35.6812]} zoom={15}>
+        {location && (
+          <MapMarker longitude={location.lng} latitude={location.lat}>
+            <MarkerContent />
+          </MapMarker>
+        )}
+      </MapView>
     </div>
   );
 };

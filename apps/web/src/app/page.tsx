@@ -1,10 +1,9 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ActiveShareCard from '@/components/active-share-card';
 import CreateShareDialog from '@/components/create-share-dialog';
-import GoogleMap from '@/components/google-map';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,18 +12,24 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  MapMarker,
+  type MapRef,
+  Map as MapView,
+  MarkerContent,
+} from '@/components/ui/map';
 import { client } from '@/lib/api-client';
 import { authClient } from '@/lib/auth-client';
 
 const Home = () => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
   const { data: session, isPending } = authClient.useSession();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
-  const [viewState, setViewState] = useState<{
-    center?: { lat: number; lng: number };
-    zoom?: number;
-  }>({});
+  const mapRef = useRef<MapRef>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   // Query for active share
   const { data: activeShare } = useQuery({
@@ -49,13 +54,17 @@ const Home = () => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setViewState((prev) => ({
-            ...prev,
-            center: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            },
-          }));
+          const newLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setCurrentLocation(newLocation);
+          // Fly to user's location
+          mapRef.current?.flyTo({
+            center: [newLocation.lng, newLocation.lat],
+            zoom: 15,
+            duration: 1500,
+          });
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -133,11 +142,11 @@ const Home = () => {
           const { latitude, longitude, heading, speed, accuracy } =
             position.coords;
 
-          // Also update map view to follow user when sharing
-          setViewState((prev) => ({
-            ...prev,
-            center: { lat: latitude, lng: longitude },
-          }));
+          const newLocation = { lat: latitude, lng: longitude };
+          setCurrentLocation(newLocation);
+
+          // Pan map to follow user when sharing
+          mapRef.current?.panTo([longitude, latitude]);
 
           updateLocationMutation.mutate({
             shareId: activeShare.id,
@@ -166,17 +175,16 @@ const Home = () => {
     <div className='relative h-svh w-full overflow-hidden'>
       {/* Background Map */}
       <div className='absolute inset-0 z-0'>
-        {apiKey ? (
-          <GoogleMap
-            apiKey={apiKey}
-            center={viewState.center}
-            zoom={viewState.zoom}
-          />
-        ) : (
-          <div className='flex h-full items-center justify-center bg-muted text-muted-foreground'>
-            Map API Key Missing
-          </div>
-        )}
+        <MapView ref={mapRef} center={[139.7671, 35.6812]} zoom={15}>
+          {currentLocation && (
+            <MapMarker
+              longitude={currentLocation.lng}
+              latitude={currentLocation.lat}
+            >
+              <MarkerContent />
+            </MapMarker>
+          )}
+        </MapView>
       </div>
 
       {/* Overlay UI */}
@@ -192,12 +200,12 @@ const Home = () => {
               />
             </div>
           ) : (
-            <Card className='border-0 shadow-xl backdrop-blur-sm bg-background/90'>
-              <CardHeader className='text-center'>
+            <Card className='backdrop-blur-sm bg-background/90'>
+              <CardHeader className='text-center pb-2'>
                 <CardTitle className='text-3xl font-extrabold tracking-tight'>
                   Chiramap
                 </CardTitle>
-                <CardDescription className='text-lg'>
+                <CardDescription className='text-base leading-relaxed'>
                   {session?.user ? (
                     <span>ようこそ、{session.user.name ?? 'ゲスト'}さん</span>
                   ) : (
@@ -209,7 +217,7 @@ const Home = () => {
                   )}
                 </CardDescription>
               </CardHeader>
-              <CardContent className='flex flex-col gap-4'>
+              <CardContent className='pt-2'>
                 {session?.user ? (
                   <div className='flex flex-col gap-3'>
                     <CreateShareDialog
@@ -218,8 +226,8 @@ const Home = () => {
                       }}
                     />
                     <Button
-                      variant='outline'
-                      className='w-full'
+                      variant='ghost'
+                      className='w-full text-muted-foreground hover:text-foreground'
                       onClick={handleLogout}
                     >
                       ログアウト
@@ -228,7 +236,7 @@ const Home = () => {
                 ) : (
                   <Button
                     size='lg'
-                    className='w-full text-lg font-bold'
+                    className='w-full font-semibold'
                     onClick={handleLogin}
                     disabled={loading || isPending}
                   >

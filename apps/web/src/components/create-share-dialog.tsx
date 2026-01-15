@@ -68,11 +68,11 @@ const CreateShareDialog = ({ onCreate }: CreateShareDialogProps) => {
           シェアを作成する
         </Button>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-[425px]'>
+      <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle>位置情報を共有</DialogTitle>
           <DialogDescription>
-            共有する期間を選択してください。期間が過ぎると自動的に無効になります。
+            共有する期間を選択してください。期間が過ぎると自動的に無効になります。いつでも手動で停止することもできます。
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -103,8 +103,8 @@ const CreateShareDialog = ({ onCreate }: CreateShareDialogProps) => {
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button type='submit' disabled={loading}>
+            <DialogFooter className='sm:flex-col'>
+              <Button type='submit' className='w-full' disabled={loading}>
                 {loading ? '作成中...' : '共有リンクを作成'}
               </Button>
             </DialogFooter>

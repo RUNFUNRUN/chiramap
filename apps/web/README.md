@@ -8,7 +8,7 @@ Chiramapのフロントエンドアプリケーションです。Next.js (App Ro
 *   **Language**: TypeScript
 *   **Styling**: Tailwind CSS
 *   **Components**: shadcn/ui
-*   **Map Integration**: Google Maps JavaScript API via `@googlemaps/js-api-loader`
+*   **Map Integration**: MapLibre GL JS (via mapcn.dev)
 *   **Runtime**: Cloudflare Workers (via OpenNext)
 *   **Deployment**: Cloudflare Pages / Workers
 
@@ -18,11 +18,9 @@ Chiramapのフロントエンドアプリケーションです。Next.js (App Ro
 
 ```env
 NEXT_PUBLIC_API_URL="http://localhost:8787"
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="AIzaSy..."
 ```
 
 *   `NEXT_PUBLIC_API_URL`: Backend APIのURL。ローカル開発時は `http://localhost:8787`。
-*   `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`: Google Maps Platform の API Key。`Maps JavaScript API` を有効化してください。
 
 ## 開発コマンド
 

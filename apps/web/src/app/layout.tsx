@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { M_PLUS_Rounded_1c } from 'next/font/google';
 import Providers from '@/components/providers';
+import ThemeToggle from '@/components/theme-toggle';
 import './globals.css';
 
 const mPlusRounded1c = M_PLUS_Rounded_1c({
@@ -27,9 +28,14 @@ const RootLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <html lang='ja'>
+    <html lang='ja' suppressHydrationWarning>
       <body className={`${mPlusRounded1c.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className='fixed top-4 right-4 z-50'>
+            <ThemeToggle />
+          </div>
+          {children}
+        </Providers>
       </body>
     </html>
   );
